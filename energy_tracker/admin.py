@@ -146,7 +146,7 @@ class MeterReadingAdmin(admin.ModelAdmin):
     quota_indicator.short_description = 'Quota'
     
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related().order_by('-reading_date')
+        return super().get_queryset(request).order_by('-reading_date')
 
 
 # Customize admin site header and title

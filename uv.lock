@@ -12,17 +12,6 @@ wheels = [
 ]
 
 [[package]]
-name = "delej"
-version = "0.1.0"
-source = { virtual = "." }
-dependencies = [
-    { name = "django" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "django", specifier = ">=6.0.1" }]
-
-[[package]]
 name = "django"
 version = "6.0.1"
 source = { registry = "https://pypi.org/simple" }
@@ -35,6 +24,17 @@ sdist = { url = "https://files.pythonhosted.org/packages/b5/9b/016f7e55e855ee738
 wheels = [
     { url = "https://files.pythonhosted.org/packages/95/b5/814ed98bd21235c116fd3436a7ed44d47560329a6d694ec8aac2982dbb93/django-6.0.1-py3-none-any.whl", hash = "sha256:a92a4ff14f664a896f9849009cb8afaca7abe0d6fc53325f3d1895a15253433d", size = 8338791, upload-time = "2026-01-06T18:55:46.175Z" },
 ]
+
+[[package]]
+name = "htariff-tracker"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "django" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "django", specifier = ">=6.0.1" }]
 
 [[package]]
 name = "sqlparse"

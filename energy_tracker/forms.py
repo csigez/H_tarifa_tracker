@@ -14,7 +14,6 @@ class MeterReadingForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control',
                     'type': 'date',
-                    'max': timezone.now().date().strftime('%Y-%m-%d')
                 }
             ),
             'summer_value': forms.NumberInput(
@@ -35,7 +34,8 @@ class MeterReadingForm(forms.ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+        self.fields['reading_date'].widget.attrs['max'] = timezone.now().date().strftime('%Y-%m-%d')
+
         # Set default date to today
         if not self.instance.pk and 'reading_date' not in self.initial:
             self.initial['reading_date'] = timezone.now().date()

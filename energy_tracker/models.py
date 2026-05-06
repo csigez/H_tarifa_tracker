@@ -64,6 +64,12 @@ class MeterReading(models.Model):
         ordering = ['-reading_date']
         verbose_name = "Meter Reading"
         verbose_name_plural = "Meter Readings"
+        constraints = [
+            models.UniqueConstraint(fields=['reading_date'], name='unique_reading_date')
+        ]
+        indexes = [
+            models.Index(fields=['reading_date'], name='reading_date_idx'),
+        ]
     
     def clean(self):
         # Check for duplicate readings on the same date
@@ -94,20 +100,22 @@ class MeterReading(models.Model):
                 )
     
     def save(self, *args, **kwargs):
+        skip_cascade = kwargs.pop('_skip_cascade', False)
+
         self.clean()
-        
+
         # Get current tariff configuration and snapshot it
         config = TariffConfig.get_config()
         self.locked_winter_price = config.winter_price
         self.locked_summer_price_low = config.summer_price_low
         self.locked_summer_price_high = config.summer_price_high
         self.locked_summer_threshold = config.summer_threshold
-        
+
         # Calculate usage deltas
         previous_reading = MeterReading.objects.filter(
             reading_date__lt=self.reading_date
         ).order_by('-reading_date').first()
-        
+
         if previous_reading:
             self.summer_usage = self.summer_value - previous_reading.summer_value
             self.winter_usage = self.winter_value - previous_reading.winter_value
@@ -115,11 +123,24 @@ class MeterReading(models.Model):
             # First reading - assume zero usage
             self.summer_usage = self.summer_value
             self.winter_usage = self.winter_value
-        
+
         # Calculate costs using tiered pricing logic
         self.total_cost = self._calculate_total_cost()
-        
+
         super().save(*args, **kwargs)
+
+        if not skip_cascade:
+            self._recalculate_subsequent_readings()
+
+    def _recalculate_subsequent_readings(self):
+        """Recalculate all readings after this one to keep usage deltas consistent."""
+        from django.db import transaction
+        subsequent = MeterReading.objects.filter(
+            reading_date__gt=self.reading_date
+        ).order_by('reading_date')
+        with transaction.atomic():
+            for reading in subsequent:
+                reading.save(_skip_cascade=True)
     
     def _calculate_total_cost(self):
         """Calculate total cost using tiered summer pricing logic"""
@@ -137,7 +158,6 @@ class MeterReading(models.Model):
             return Decimal('0.00')
         
         # Get cumulative summer usage for the current year before this reading
-        year_start = self.reading_date.replace(month=1, day=1)
         previous_year_readings = MeterReading.objects.filter(
             reading_date__year=self.reading_date.year,
             reading_date__lt=self.reading_date
@@ -171,7 +191,6 @@ class MeterReading(models.Model):
     
     def get_yearly_cumulative_summer_usage(self):
         """Get cumulative summer usage for the current year including this reading"""
-        year_start = self.reading_date.replace(month=1, day=1)
         year_readings = MeterReading.objects.filter(
             reading_date__year=self.reading_date.year,
             reading_date__lte=self.reading_date

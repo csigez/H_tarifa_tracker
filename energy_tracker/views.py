@@ -4,7 +4,6 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Sum
 from django.utils import timezone
-from datetime import datetime
 from .models import MeterReading, TariffConfig
 from .forms import MeterReadingForm
 
@@ -17,7 +16,7 @@ class DashboardView(ListView):
     paginate_by = 10
     
     def get_queryset(self):
-        return MeterReading.objects.order_by('-reading_date')[:10]
+        return MeterReading.objects.order_by('-reading_date')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -98,7 +97,7 @@ class MeterReadingDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         
         # Get previous and next readings for comparison
-        reading = self.get_object()
+        reading = self.object
         
         previous_reading = MeterReading.objects.filter(
             reading_date__lt=reading.reading_date
@@ -116,6 +115,8 @@ class MeterReadingDetailView(DetailView):
 
 def add_reading(request):
     """Function-based view for adding readings (alternative to class-based)"""
+    previous_reading = MeterReading.objects.order_by('-reading_date').first()
+
     if request.method == 'POST':
         form = MeterReadingForm(request.POST)
         if form.is_valid():
@@ -124,11 +125,11 @@ def add_reading(request):
             return redirect('energy_tracker:dashboard')
     else:
         form = MeterReadingForm()
-        
-        # Pre-fill with previous reading values
-        previous_reading = MeterReading.objects.order_by('-reading_date').first()
         if previous_reading:
             form.initial['summer_value'] = previous_reading.summer_value
             form.initial['winter_value'] = previous_reading.winter_value
-    
-    return render(request, 'energy_tracker/add_reading.html', {'form': form})
+
+    return render(request, 'energy_tracker/reading_form.html', {
+        'form': form,
+        'previous_reading': previous_reading,
+    })

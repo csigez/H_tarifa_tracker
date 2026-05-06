@@ -166,7 +166,7 @@
                                             <span class="badge bg-success badge-cost">{{ reading.total_cost|floatformat:0 }} Ft</span>
                                         </td>
                                         <td>
-                                            {% with quota_pct=reading.get_quota_usage_percentage %}
+                                            {% with quota_pct=year_stats.quota_percentage %}
                                                 {% if quota_pct < 70 %}
                                                     <span class="badge bg-success">{{ quota_pct|floatformat:0 }}%</span>
                                                 {% elif quota_pct < 90 %}
@@ -186,6 +186,25 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+                    {% if is_paginated %}
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a>
+                                </li>
+                            {% endif %}
+                            <li class="page-item disabled">
+                                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
                     </div>
                 {% else %}
                     <div class="text-center py-4">

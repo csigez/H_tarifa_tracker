@@ -323,3 +323,5 @@ test_*.py
 # Temporary files
 *.tmp
 *.temp
+
+docs/

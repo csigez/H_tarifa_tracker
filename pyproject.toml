@@ -1,5 +1,5 @@
 [project]
-name = "delej"
+name = "htariff-tracker"
 version = "0.1.0"
 description = "A django app to track electricity usage and costs"
 readme = "README.md"
