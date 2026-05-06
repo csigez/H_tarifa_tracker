@@ -51,7 +51,7 @@ Core model for storing meter readings with calculated fields:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd dej
+   cd H_tarifa_tracker
    ```
 
 2. **Set up virtual environment**
@@ -99,7 +99,7 @@ Core model for storing meter readings with calculated fields:
 ### Understanding the Display
 
 #### Dashboard Overview
-- **Recent Readings**: Latest 10 meter readings
+- **Recent Readings**: Paginated list of meter readings (10 per page)
 - **Year Statistics**: Current year consumption and costs
 - **Quota Status**: Visual progress bar showing summer quota usage
 
@@ -210,6 +210,7 @@ Templates located in `energy_tracker/templates/energy_tracker/`:
 - **Negative Consumption Prevention**: Blocks decreasing meter values
 - **Immutable History**: Price changes don't affect existing records
 - **Singleton Configuration**: Prevents multiple tariff configurations
+- **Cascade Recalculation**: Editing a past reading automatically recalculates usage deltas and costs for all subsequent readings
 
 ### Error Handling
 
@@ -283,6 +284,12 @@ The application provides comprehensive error messages:
 - **URL Reversal Error**: Corrected namespaced URL references
 - **Admin Interface**: Fixed format_html usage in admin methods
 - **Negative Consumption**: Added comprehensive validation
+- **Cascade Recalculation**: Editing a past reading now updates all subsequent readings automatically
+- **Data Integrity**: Added unique constraint and database index on reading date
+- **Pagination**: Dashboard now paginates all readings instead of showing a fixed 10
+- **Quota Display**: Dashboard shows yearly quota percentage consistently across all rows
+- **Admin Access**: Admin navigation link now only visible to staff users
+- **Package Rename**: Project renamed from `delej` to `htariff-tracker`
 
 ## 📄 License
 
