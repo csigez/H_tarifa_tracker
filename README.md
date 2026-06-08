@@ -147,15 +147,43 @@ The test suite includes:
 - **Consumption Calculation**: Validates usage delta computations
 - **Tiered Pricing Logic**: Tests quota crossing calculations
 - **Price Isolation**: Ensures historical records are protected
+- **Cascade Recalculation**: Verifies that editing a past reading correctly
+  recalculates usage deltas and costs for all subsequent readings, that the
+  `_skip_cascade` flag prevents recursive recalculation, and documents that
+  the cascade re-locks subsequent readings' prices to the *current* tariff
+  configuration
 
 #### Edge Case Tests
 - **Negative Consumption Prevention**: Validates input protection
 - **Boundary Conditions**: Tests quota threshold scenarios
 - **Data Integrity**: Ensures snapshot immutability
+- **Multi-Year Quotas**: Confirms cumulative summer usage resets at the
+  calendar year boundary instead of carrying over
 
 #### Model Tests
 - **TariffConfig Validation**: Singleton behavior and price relationships
-- **Form Validation**: User input sanitization
+- **Helper Methods**: `get_yearly_cumulative_summer_usage()` and
+  `get_quota_usage_percentage()` (including the 100% cap)
+
+#### Form Tests
+- **MeterReadingForm Validation**: Duplicate dates, negative values, and
+  negative-consumption cross-field checks
+
+#### View Tests
+- **Dashboard**: Year statistics, quota context, and pagination (10 readings
+  per page)
+- **Create Views**: Both the class-based and function-based reading creation
+  views, including form pre-fill and redirect-on-success behavior
+- **Detail View**: Previous/next reading navigation and 404 handling
+
+#### Admin Tests
+- **Custom Display Methods**: `cost_breakdown`, `quota_status`, and
+  `quota_indicator` HTML rendering
+- **Singleton Permissions**: `TariffConfig` add/delete restrictions
+
+#### Template Tag Tests
+- **Math Filters**: `mul`, `sub`, and `div`, including their fallback to `0`
+  on invalid input or division by zero
 
 ### Test-Driven Development
 
@@ -283,6 +311,10 @@ The application provides comprehensive error messages:
 - **Template Filter Error**: Fixed custom math filters for cost calculations
 - **URL Reversal Error**: Corrected namespaced URL references
 - **Admin Interface**: Fixed format_html usage in admin methods
+- **Quota Indicator Crash**: Fixed `quota_indicator` raising `ValueError: Unknown
+  format code 'f' for object of type 'SafeString'` on every render — `format_html`
+  escapes numeric arguments to strings before applying format specs, so the
+  percentage is now pre-formatted with an f-string (matching `quota_status`)
 - **Negative Consumption**: Added comprehensive validation
 - **Cascade Recalculation**: Editing a past reading now updates all subsequent readings automatically
 - **Data Integrity**: Added unique constraint and database index on reading date

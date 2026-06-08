@@ -140,8 +140,8 @@ class MeterReadingAdmin(admin.ModelAdmin):
             symbol = '✗'
         
         return format_html(
-            '<span style="color: {0};">{1} {2:.0f}%</span>',
-            color, symbol, percentage
+            '<span style="color: {0};">{1} {2}%</span>',
+            color, symbol, f"{percentage:.0f}"
         )
     quota_indicator.short_description = 'Quota'
     
