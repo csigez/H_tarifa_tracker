@@ -325,3 +325,5 @@ test_*.py
 *.temp
 
 docs/
+CLAUDE.md
+.claude/
