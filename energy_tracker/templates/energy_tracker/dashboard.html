@@ -166,7 +166,7 @@
                                             <span class="badge bg-success badge-cost">{{ reading.total_cost|floatformat:0 }} Ft</span>
                                         </td>
                                         <td>
-                                            {% with quota_pct=year_stats.quota_percentage %}
+                                            {% with quota_pct=reading.get_quota_usage_percentage %}
                                                 {% if quota_pct < 70 %}
                                                     <span class="badge bg-success">{{ quota_pct|floatformat:0 }}%</span>
                                                 {% elif quota_pct < 90 %}
