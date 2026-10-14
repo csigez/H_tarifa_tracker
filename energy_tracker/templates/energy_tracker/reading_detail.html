@@ -4,242 +4,131 @@
 {% block title %}Reading Details - H-Tariff Tracker{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="bi bi-eye me-2"></i>
-                        Meter Reading Details
-                    </h5>
-                    <div>
-                        {% if previous_reading %}
-                            <a href="{% url 'energy_tracker:reading_detail' previous_reading.pk %}" 
-                               class="btn btn-sm btn-outline-secondary me-2">
-                                <i class="bi bi-chevron-left"></i> Previous
-                            </a>
-                        {% endif %}
-                        {% if next_reading %}
-                            <a href="{% url 'energy_tracker:reading_detail' next_reading.pk %}" 
-                               class="btn btn-sm btn-outline-secondary">
-                                Next <i class="bi bi-chevron-right"></i>
-                            </a>
-                        {% endif %}
-                    </div>
+<div class="layout">
+    <div>
+        <div class="panel">
+            <div class="panel__header">
+                <h3>Meter reading &mdash; {{ reading.reading_date }}</h3>
+                <div class="btn-row">
+                    {% if previous_reading %}
+                        <a href="{% url 'energy_tracker:reading_detail' previous_reading.pk %}" class="btn btn--ghost btn--sm">&lsaquo; Previous</a>
+                    {% endif %}
+                    {% if next_reading %}
+                        <a href="{% url 'energy_tracker:reading_detail' next_reading.pk %}" class="btn btn--ghost btn--sm">Next &rsaquo;</a>
+                    {% endif %}
                 </div>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Reading Information</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Date:</th>
-                                <td>{{ reading.reading_date }}</td>
-                            </tr>
-                            <tr>
-                                <th>Summer Value:</th>
-                                <td>{{ reading.summer_value|floatformat:0 }} kWh</td>
-                            </tr>
-                            <tr>
-                                <th>Winter Value:</th>
-                                <td>{{ reading.winter_value|floatformat:0 }} kWh</td>
-                            </tr>
-                        </table>
+            <div class="panel__body">
+                <div class="split">
+                    <div class="slip">
+                        <h3 style="font-size: 1rem;">Reading</h3>
+                        <div class="row"><span>Date</span><span>{{ reading.reading_date }}</span></div>
+                        <div class="row"><span>Summer value</span><span>{{ reading.summer_value|floatformat:0 }} kWh</span></div>
+                        <div class="row"><span>Winter value</span><span>{{ reading.winter_value|floatformat:0 }} kWh</span></div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <h6>Usage & Cost</h6>
-                        <table class="table table-sm">
-                            <tr>
-                                <th>Summer Usage:</th>
-                                <td>
-                                    {% if reading.summer_usage > 0 %}
-                                        <span class="badge bg-primary">{{ reading.summer_usage|floatformat:0 }} kWh</span>
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Winter Usage:</th>
-                                <td>
-                                    {% if reading.winter_usage > 0 %}
-                                        <span class="badge bg-info">{{ reading.winter_usage|floatformat:0 }} kWh</span>
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Total Cost:</th>
-                                <td><span class="badge bg-success">{{ reading.total_cost|floatformat:0 }} Ft</span></td>
-                            </tr>
-                        </table>
+                    <div class="slip">
+                        <h3 style="font-size: 1rem;">Usage &amp; cost</h3>
+                        <div class="row">
+                            <span>Summer usage</span>
+                            <span>
+                                {% if reading.summer_usage > 0 %}
+                                    <span class="pill pill--summer">{{ reading.summer_usage|floatformat:0 }} kWh</span>
+                                {% else %}&mdash;{% endif %}
+                            </span>
+                        </div>
+                        <div class="row">
+                            <span>Winter usage</span>
+                            <span>
+                                {% if reading.winter_usage > 0 %}
+                                    <span class="pill pill--winter">{{ reading.winter_usage|floatformat:0 }} kWh</span>
+                                {% else %}&mdash;{% endif %}
+                            </span>
+                        </div>
+                        <div class="row"><span>Total cost</span><span class="pill pill--cost">{{ reading.total_cost|floatformat:0 }} Ft</span></div>
                     </div>
                 </div>
-                
-                <hr>
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Cost Breakdown</h6>
-                        <div class="bg-light p-3 rounded">
+
+                <div class="split">
+                    <div>
+                        <h3 style="font-size: 1rem;">Cost breakdown</h3>
+                        <div class="breakdown">
                             {% with winter_cost=reading.winter_usage|mul:reading.locked_winter_price %}
                                 {% with summer_cost=reading.total_cost|sub:winter_cost %}
-                                    <div class="mb-2">
-                                        <strong>Winter:</strong> {{ reading.winter_usage|floatformat:0 }} kWh × 
-                                        {{ reading.locked_winter_price }} Ft = 
-                                        <strong>{{ winter_cost|floatformat:0 }} Ft</strong>
-                                    </div>
-                                    <div class="mb-2">
-                                        <strong>Summer:</strong> {{ reading.summer_usage|floatformat:0 }} kWh = 
-                                        <strong>{{ summer_cost|floatformat:0 }} Ft</strong>
-                                    </div>
-                                    <div class="border-top pt-2">
-                                        <strong>Total:</strong> {{ reading.total_cost|floatformat:0 }} Ft
-                                    </div>
+                                    <div class="row"><span>Winter: {{ reading.winter_usage|floatformat:0 }} kWh &times; {{ reading.locked_winter_price }} Ft</span><span>{{ winter_cost|floatformat:0 }} Ft</span></div>
+                                    <div class="row"><span>Summer: {{ reading.summer_usage|floatformat:0 }} kWh</span><span>{{ summer_cost|floatformat:0 }} Ft</span></div>
+                                    <div class="row total"><span>Total</span><span>{{ reading.total_cost|floatformat:0 }} Ft</span></div>
                                 {% endwith %}
                             {% endwith %}
                         </div>
                     </div>
-                    
-                    <div class="col-md-6">
-                        <h6>Summer Quota Status</h6>
-                        <div class="bg-light p-3 rounded">
+
+                    <div>
+                        <h3 style="font-size: 1rem;">Summer quota status</h3>
+                        <div class="breakdown">
                             {% with cumulative=reading.get_yearly_cumulative_summer_usage %}
                                 {% with percentage=reading.get_quota_usage_percentage %}
-                                    <div class="mb-2">
-                                        <strong>Yearly Usage:</strong> {{ cumulative|floatformat:0 }} / 
-                                        {{ reading.locked_summer_threshold }} kWh
-                                    </div>
-                                    <div class="progress mb-2" style="height: 20px;">
+                                    <div class="row"><span>Yearly usage</span><span>{{ cumulative|floatformat:0 }} / {{ reading.locked_summer_threshold }} kWh</span></div>
+                                    <div class="meter__gauge" style="background: var(--hairline); margin: 0.6rem 0;">
                                         {% if percentage < 70 %}
-                                            <div class="progress-bar bg-success" style="width: {{ percentage }}%">
-                                                {{ percentage|floatformat:1 }}%
-                                            </div>
+                                            <div class="meter__gauge-fill quota-low" style="width: {{ percentage }}%;"></div>
                                         {% elif percentage < 90 %}
-                                            <div class="progress-bar bg-warning" style="width: {{ percentage }}%">
-                                                {{ percentage|floatformat:1 }}%
-                                            </div>
+                                            <div class="meter__gauge-fill quota-mid" style="width: {{ percentage }}%;"></div>
                                         {% else %}
-                                            <div class="progress-bar bg-danger" style="width: {{ percentage }}%">
-                                                {{ percentage|floatformat:1 }}%
-                                            </div>
+                                            <div class="meter__gauge-fill quota-high" style="width: {{ percentage }}%;"></div>
                                         {% endif %}
                                     </div>
-                                    <div class="small text-muted">
-                                        {{ reading.locked_summer_threshold|sub:cumulative|floatformat:0 }} kWh remaining in quota
-                                    </div>
+                                    <div class="row"><span>Remaining</span><span>{{ reading.locked_summer_threshold|sub:cumulative|floatformat:0 }} kWh</span></div>
                                 {% endwith %}
                             {% endwith %}
                         </div>
                     </div>
                 </div>
-                
-                <hr>
-                
-                <div class="row">
-                    <div class="col-12">
-                        <h6>Historical Pricing (Snapshotted)</h6>
-                        <div class="alert alert-info">
-                            <small class="text-muted">
-                                These prices were locked in when this reading was saved and will not change 
-                                even if current tariff prices are updated.
-                            </small>
-                            <div class="row mt-2">
-                                <div class="col-md-3">
-                                    <strong>Winter:</strong> {{ reading.locked_winter_price }} Ft/kWh
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Summer Low:</strong> {{ reading.locked_summer_price_low }} Ft/kWh
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Summer High:</strong> {{ reading.locked_summer_price_high }} Ft/kWh
-                                </div>
-                                <div class="col-md-3">
-                                    <strong>Threshold:</strong> {{ reading.locked_summer_threshold }} kWh
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
+                <h3 style="font-size: 1rem; margin-top: 1.25rem;">Historical pricing (locked)</h3>
+                <div class="info-note">
+                    These prices were locked in when this reading was saved and won't change even if current tariff prices are updated.
+                </div>
+                <div class="pricing-strip" style="margin-top: 0.75rem;">
+                    <div><span>Winter</span>{{ reading.locked_winter_price }} Ft/kWh</div>
+                    <div><span>Summer low</span>{{ reading.locked_summer_price_low }} Ft/kWh</div>
+                    <div><span>Summer high</span>{{ reading.locked_summer_price_high }} Ft/kWh</div>
+                    <div><span>Threshold</span>{{ reading.locked_summer_threshold }} kWh</div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
+
+    <div>
         {% if previous_reading %}
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-arrow-left me-2"></i>
-                        Previous Reading
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small">
-                        <div class="mb-2">
-                            <strong>Date:</strong> {{ previous_reading.reading_date }}
-                        </div>
-                        <div class="mb-2">
-                            <strong>Summer:</strong> {{ previous_reading.summer_value|floatformat:0 }} kWh
-                        </div>
-                        <div class="mb-2">
-                            <strong>Winter:</strong> {{ previous_reading.winter_value|floatformat:0 }} kWh
-                        </div>
-                        <div>
-                            <strong>Cost:</strong> {{ previous_reading.total_cost|floatformat:0 }} Ft
-                        </div>
-                    </div>
+            <div class="panel">
+                <div class="panel__header"><h3>Previous reading</h3></div>
+                <div class="panel__body slip">
+                    <div class="row"><span>Date</span><span>{{ previous_reading.reading_date }}</span></div>
+                    <div class="row"><span>Summer</span><span>{{ previous_reading.summer_value|floatformat:0 }} kWh</span></div>
+                    <div class="row"><span>Winter</span><span>{{ previous_reading.winter_value|floatformat:0 }} kWh</span></div>
+                    <div class="row"><span>Cost</span><span>{{ previous_reading.total_cost|floatformat:0 }} Ft</span></div>
                 </div>
             </div>
         {% endif %}
-        
+
         {% if next_reading %}
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-arrow-right me-2"></i>
-                        Next Reading
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small">
-                        <div class="mb-2">
-                            <strong>Date:</strong> {{ next_reading.reading_date }}
-                        </div>
-                        <div class="mb-2">
-                            <strong>Summer:</strong> {{ next_reading.summer_value|floatformat:0 }} kWh
-                        </div>
-                        <div class="mb-2">
-                            <strong>Winter:</strong> {{ next_reading.winter_value|floatformat:0 }} kWh
-                        </div>
-                        <div>
-                            <strong>Cost:</strong> {{ next_reading.total_cost|floatformat:0 }} Ft
-                        </div>
-                    </div>
+            <div class="panel">
+                <div class="panel__header"><h3>Next reading</h3></div>
+                <div class="panel__body slip">
+                    <div class="row"><span>Date</span><span>{{ next_reading.reading_date }}</span></div>
+                    <div class="row"><span>Summer</span><span>{{ next_reading.summer_value|floatformat:0 }} kWh</span></div>
+                    <div class="row"><span>Winter</span><span>{{ next_reading.winter_value|floatformat:0 }} kWh</span></div>
+                    <div class="row"><span>Cost</span><span>{{ next_reading.total_cost|floatformat:0 }} Ft</span></div>
                 </div>
             </div>
         {% endif %}
-        
-        <div class="card mt-3">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Actions
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{% url 'energy_tracker:dashboard' %}" class="btn btn-primary">
-                        <i class="bi bi-speedometer2 me-1"></i> Back to Dashboard
-                    </a>
-                    <a href="{% url 'admin:energy_tracker_meterreading_change' reading.pk %}" 
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-pencil me-1"></i> Edit in Admin
-                    </a>
+
+        <div class="panel">
+            <div class="panel__header"><h3>Actions</h3></div>
+            <div class="panel__body">
+                <div class="btn-row" style="flex-direction: column;">
+                    <a href="{% url 'energy_tracker:dashboard' %}" class="btn">Back to dashboard</a>
+                    <a href="{% url 'admin:energy_tracker_meterreading_change' reading.pk %}" class="btn btn--ghost">Edit in admin</a>
                 </div>
             </div>
         </div>

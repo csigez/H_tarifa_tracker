@@ -12,20 +12,17 @@ class MeterReadingForm(forms.ModelForm):
         widgets = {
             'reading_date': forms.DateInput(
                 attrs={
-                    'class': 'form-control',
                     'type': 'date',
                 }
             ),
             'summer_value': forms.NumberInput(
                 attrs={
-                    'class': 'form-control',
                     'placeholder': 'Enter summer register value',
                     'min': '0'
                 }
             ),
             'winter_value': forms.NumberInput(
                 attrs={
-                    'class': 'form-control',
                     'placeholder': 'Enter winter register value',
                     'min': '0'
                 }
@@ -40,9 +37,8 @@ class MeterReadingForm(forms.ModelForm):
         if not self.instance.pk and 'reading_date' not in self.initial:
             self.initial['reading_date'] = timezone.now().date()
         
-        # Add Bootstrap classes and placeholders
+        # Add placeholders
         for field_name, field in self.fields.items():
-            field.widget.attrs['class'] = 'form-control'
             if not field.widget.attrs.get('placeholder'):
                 field.widget.attrs['placeholder'] = field.label
     

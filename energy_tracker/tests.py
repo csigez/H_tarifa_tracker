@@ -581,7 +581,7 @@ class MeterReadingCreateViewTestCase(TestCase):
         response = self.client.get(reverse('energy_tracker:add_reading'))
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Add New Meter Reading')
+        self.assertContains(response, 'Add new meter reading')
 
     def test_post_valid_data_creates_reading_and_redirects(self):
         response = self.client.post(reverse('energy_tracker:add_reading'), data={

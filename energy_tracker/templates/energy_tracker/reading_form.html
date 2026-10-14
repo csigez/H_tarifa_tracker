@@ -3,133 +3,85 @@
 {% block title %}Add Meter Reading - H-Tariff Tracker{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-plus-circle me-2"></i>
-                    Add New Meter Reading
-                </h5>
-            </div>
-            <div class="card-body">
+<div class="layout">
+    <div>
+        <div class="panel">
+            <div class="panel__header"><h3>Add new meter reading</h3></div>
+            <div class="panel__body">
                 <form method="post">
                     {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.reading_date.id_for_label }}" class="form-label">
-                            <i class="bi bi-calendar me-1"></i>Reading Date
-                        </label>
+
+                    {% if form.non_field_errors %}
+                        <div class="form-error-banner">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="field">
+                        <label for="{{ form.reading_date.id_for_label }}">Reading date</label>
                         {{ form.reading_date }}
                         {% if form.reading_date.errors %}
-                            <div class="text-danger small mt-1">
-                                {{ form.reading_date.errors }}
-                            </div>
+                            <div class="error">{{ form.reading_date.errors }}</div>
                         {% endif %}
-                        <div class="form-text">Enter the date when you took the meter reading</div>
+                        <div class="hint">The date you took the meter reading.</div>
                     </div>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ form.summer_value.id_for_label }}" class="form-label">
-                                    <i class="bi bi-sun me-1"></i>Summer Register Value
-                                </label>
-                                {{ form.summer_value }}
-                                {% if form.summer_value.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.summer_value.errors }}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">Current value on the summer register (kWh)</div>
-                            </div>
+
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="{{ form.summer_value.id_for_label }}">Summer register value</label>
+                            {{ form.summer_value }}
+                            {% if form.summer_value.errors %}
+                                <div class="error">{{ form.summer_value.errors }}</div>
+                            {% endif %}
+                            <div class="hint">Current value on the summer register (kWh).</div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="{{ form.winter_value.id_for_label }}" class="form-label">
-                                    <i class="bi bi-snow me-1"></i>Winter Register Value
-                                </label>
-                                {{ form.winter_value }}
-                                {% if form.winter_value.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ form.winter_value.errors }}
-                                    </div>
-                                {% endif %}
-                                <div class="form-text">Current value on the winter register (kWh)</div>
-                            </div>
+
+                        <div class="field">
+                            <label for="{{ form.winter_value.id_for_label }}">Winter register value</label>
+                            {{ form.winter_value }}
+                            {% if form.winter_value.errors %}
+                                <div class="error">{{ form.winter_value.errors }}</div>
+                            {% endif %}
+                            <div class="hint">Current value on the winter register (kWh).</div>
                         </div>
                     </div>
-                    
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger">
-                            {{ form.non_field_errors }}
-                        </div>
-                    {% endif %}
-                    
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-save me-1"></i> Save Reading
-                        </button>
-                        <a href="{% url 'energy_tracker:dashboard' %}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle me-1"></i> Cancel
-                        </a>
+
+                    <div class="btn-row">
+                        <button type="submit" class="btn">Save reading</button>
+                        <a href="{% url 'energy_tracker:dashboard' %}" class="btn btn--ghost">Cancel</a>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-4">
+
+    <div>
         {% if previous_reading %}
-            <div class="card">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Previous Reading
-                    </h6>
-                </div>
-                <div class="card-body">
-                    <div class="small">
-                        <div class="mb-2">
-                            <strong>Date:</strong> {{ previous_reading.reading_date }}
-                        </div>
-                        <div class="mb-2">
-                            <strong>Summer:</strong> {{ previous_reading.summer_value|floatformat:0 }} kWh
-                        </div>
-                        <div class="mb-2">
-                            <strong>Winter:</strong> {{ previous_reading.winter_value|floatformat:0 }} kWh
-                        </div>
-                        <div class="mb-2">
-                            <strong>Usage:</strong> 
-                            <span class="badge bg-primary">{{ previous_reading.summer_usage|floatformat:0 }}</span>
-                            <span class="badge bg-info">{{ previous_reading.winter_usage|floatformat:0 }}</span>
-                        </div>
-                        <div>
-                            <strong>Cost:</strong> 
-                            <span class="badge bg-success">{{ previous_reading.total_cost|floatformat:0 }} Ft</span>
-                        </div>
+            <div class="panel">
+                <div class="panel__header"><h3>Previous reading</h3></div>
+                <div class="panel__body slip">
+                    <div class="row"><span>Date</span><span>{{ previous_reading.reading_date }}</span></div>
+                    <div class="row"><span>Summer</span><span>{{ previous_reading.summer_value|floatformat:0 }} kWh</span></div>
+                    <div class="row"><span>Winter</span><span>{{ previous_reading.winter_value|floatformat:0 }} kWh</span></div>
+                    <div class="row">
+                        <span>Usage</span>
+                        <span>
+                            <span class="pill pill--summer">{{ previous_reading.summer_usage|floatformat:0 }}</span>
+                            <span class="pill pill--winter">{{ previous_reading.winter_usage|floatformat:0 }}</span>
+                        </span>
                     </div>
+                    <div class="row"><span>Cost</span><span class="pill pill--cost">{{ previous_reading.total_cost|floatformat:0 }} Ft</span></div>
                 </div>
             </div>
         {% endif %}
-        
-        <div class="card mt-3">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="bi bi-lightbulb me-2"></i>
-                    Tips
-                </h6>
-            </div>
-            <div class="card-body">
-                <div class="small">
-                    <ul class="mb-0">
-                        <li>Enter the absolute values shown on your meter</li>
-                        <li>Summer value should typically be ≥ Winter value</li>
-                        <li>The system will calculate usage and costs automatically</li>
-                        <li>Historical pricing is preserved for accurate cost tracking</li>
-                    </ul>
-                </div>
+
+        <div class="panel">
+            <div class="panel__header"><h3>Tips</h3></div>
+            <div class="panel__body">
+                <ul class="tips">
+                    <li>Enter the absolute values shown on your meter.</li>
+                    <li>Summer value should typically be &ge; winter value.</li>
+                    <li>Usage and cost are calculated automatically from the previous reading.</li>
+                    <li>Historical pricing is preserved even if tariffs change later.</li>
+                </ul>
             </div>
         </div>
     </div>

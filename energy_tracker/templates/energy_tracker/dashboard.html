@@ -3,221 +3,158 @@
 {% block title %}Dashboard - H-Tariff Tracker{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center">
-            <h1><i class="bi bi-speedometer2 me-2"></i>Energy Dashboard</h1>
-            <a href="{% url 'energy_tracker:add_reading' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i> Add Reading
-            </a>
+
+<div class="page-head">
+    <h1>Energy dashboard</h1>
+    <a href="{% url 'energy_tracker:add_reading' %}" class="btn">Add reading</a>
+</div>
+
+<div class="meter">
+    <div class="meter__registers">
+        <div class="meter__register meter__register--summer">
+            <div class="meter__label">Summer register</div>
+            <div class="meter__value">
+                <span data-roll data-target="{{ current_summer_value|default:0 }}">0</span><span class="meter__unit">kWh</span>
+            </div>
+        </div>
+        <div class="meter__register meter__register--winter">
+            <div class="meter__label">Winter register</div>
+            <div class="meter__value">
+                <span data-roll data-target="{{ current_winter_value|default:0 }}">0</span><span class="meter__unit">kWh</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="meter__gauge-row">
+        <div class="meter__gauge-meta">
+            <span><strong>{{ year_stats.quota_used|floatformat:0 }}</strong> / {{ config.summer_threshold|floatformat:0 }} kWh summer quota used</span>
+            <span>{{ year_stats.quota_percentage|floatformat:1 }}%</span>
+        </div>
+        <div class="meter__gauge">
+            {% if year_stats.quota_percentage < 70 %}
+                <div class="meter__gauge-fill quota-low" data-gauge data-target="{{ year_stats.quota_percentage }}"></div>
+            {% elif year_stats.quota_percentage < 90 %}
+                <div class="meter__gauge-fill quota-mid" data-gauge data-target="{{ year_stats.quota_percentage }}"></div>
+            {% else %}
+                <div class="meter__gauge-fill quota-high" data-gauge data-target="{{ year_stats.quota_percentage }}"></div>
+            {% endif %}
+        </div>
+        <div class="meter__sub">
+            <strong>{{ year_stats.quota_remaining|floatformat:0 }}</strong> kWh remaining before the summer rate rises
         </div>
     </div>
 </div>
 
-<!-- Year Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Summer Usage</h6>
-                <h3 class="card-title text-primary">{{ year_stats.summer_usage|floatformat:0 }} kWh</h3>
-            </div>
+<div class="stat-row">
+    <div class="panel" style="margin-bottom: 0;">
+        <div class="panel__header"><h3>This year</h3></div>
+        <div class="panel__body slip">
+            <div class="row"><span>Summer usage</span><span>{{ year_stats.summer_usage|floatformat:0 }} kWh</span></div>
+            <div class="row"><span>Winter usage</span><span>{{ year_stats.winter_usage|floatformat:0 }} kWh</span></div>
+            <div class="row"><span>Total cost</span><span>{{ year_stats.total_cost|floatformat:0 }} Ft</span></div>
         </div>
     </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Winter Usage</h6>
-                <h3 class="card-title text-info">{{ year_stats.winter_usage|floatformat:0 }} kWh</h3>
-            </div>
+    <div class="panel" style="margin-bottom: 0;">
+        <div class="panel__header"><h3>Current pricing</h3></div>
+        <div class="panel__body slip">
+            <div class="row"><span>Winter</span><span>{{ config.winter_price }} Ft/kWh</span></div>
+            <div class="row"><span>Summer, below quota</span><span>{{ config.summer_price_low }} Ft/kWh</span></div>
+            <div class="row"><span>Summer, above quota</span><span>{{ config.summer_price_high }} Ft/kWh</span></div>
         </div>
     </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Total Cost</h6>
-                <h3 class="card-title text-success">{{ year_stats.total_cost|floatformat:0 }} Ft</h3>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-md-3">
-        <div class="card stat-card h-100">
-            <div class="card-body">
-                <h6 class="card-subtitle mb-2 text-muted">Current Values</h6>
-                <div class="small">
-                    <div>Summer: <strong>{{ current_summer_value|default:0|floatformat:0 }}</strong> kWh</div>
-                    <div>Winter: <strong>{{ current_winter_value|default:0|floatformat:0 }}</strong> kWh</div>
-                </div>
-            </div>
+    <div class="panel" style="margin-bottom: 0;">
+        <div class="panel__header"><h3>Latest reading</h3></div>
+        <div class="panel__body slip">
+            {% if latest_reading %}
+                <div class="row"><span>Date</span><span>{{ latest_reading.reading_date }}</span></div>
+                <div class="row"><span>Summer value</span><span>{{ latest_reading.summer_value|floatformat:0 }} kWh</span></div>
+                <div class="row"><span>Winter value</span><span>{{ latest_reading.winter_value|floatformat:0 }} kWh</span></div>
+            {% else %}
+                <p class="hint" style="margin:0; color: var(--ink-muted);">No readings yet this year.</p>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Summer Quota Status -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-battery-charging me-2"></i>
-                    Summer Quota Status
-                </h5>
+<div class="panel">
+    <div class="panel__header"><h3>Reading history</h3></div>
+    <div class="panel__body">
+        {% if recent_readings %}
+            <div class="ledger-wrap">
+                <table class="ledger">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th class="num">Summer</th>
+                            <th class="num">Winter</th>
+                            <th class="num">Usage S / W</th>
+                            <th class="num">Cost</th>
+                            <th class="num">Quota</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reading in recent_readings %}
+                            <tr>
+                                <td>{{ reading.reading_date }}</td>
+                                <td class="num">{{ reading.summer_value|floatformat:0 }}</td>
+                                <td class="num">{{ reading.winter_value|floatformat:0 }}</td>
+                                <td class="num">
+                                    {% if reading.summer_usage > 0 %}
+                                        <span class="pill pill--summer">{{ reading.summer_usage|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="muted">&mdash;</span>
+                                    {% endif %}
+                                    {% if reading.winter_usage > 0 %}
+                                        <span class="pill pill--winter">{{ reading.winter_usage|floatformat:0 }}</span>
+                                    {% else %}
+                                        <span class="muted">&mdash;</span>
+                                    {% endif %}
+                                </td>
+                                <td class="num">{{ reading.total_cost|floatformat:0 }} Ft</td>
+                                <td class="num">
+                                    {% with quota_pct=reading.get_quota_usage_percentage %}
+                                        {% if quota_pct < 70 %}
+                                            <span class="pill pill--quota-low">{{ quota_pct|floatformat:0 }}%</span>
+                                        {% elif quota_pct < 90 %}
+                                            <span class="pill pill--quota-mid">{{ quota_pct|floatformat:0 }}%</span>
+                                        {% else %}
+                                            <span class="pill pill--quota-high">{{ quota_pct|floatformat:0 }}%</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                                <td class="num">
+                                    <a href="{% url 'energy_tracker:reading_detail' reading.pk %}" class="btn btn--ghost btn--sm">View</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <div class="mb-2">
-                            <strong>{{ year_stats.quota_used|floatformat:0 }}</strong> / 
-                            <strong>{{ config.summer_threshold }}</strong> kWh used
-                            <span class="ms-2 badge bg-secondary">{{ year_stats.quota_percentage|floatformat:1 }}%</span>
-                        </div>
-                        
-                        <div class="progress" style="height: 25px;">
-                            {% if year_stats.quota_percentage < 70 %}
-                                <div class="progress-bar quota-bar quota-low" 
-                                     style="width: {{ year_stats.quota_percentage }}%">
-                                    {{ year_stats.quota_percentage|floatformat:1 }}%
-                                </div>
-                            {% elif year_stats.quota_percentage < 90 %}
-                                <div class="progress-bar quota-bar quota-medium" 
-                                     style="width: {{ year_stats.quota_percentage }}%">
-                                    {{ year_stats.quota_percentage|floatformat:1 }}%
-                                </div>
-                            {% else %}
-                                <div class="progress-bar quota-bar quota-high" 
-                                     style="width: {{ year_stats.quota_percentage }}%">
-                                    {{ year_stats.quota_percentage|floatformat:1 }}%
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="mt-2 small text-muted">
-                            <strong>{{ year_stats.quota_remaining|floatformat:0 }}</strong> kWh remaining in quota
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-4">
-                        <div class="text-center">
-                            <div class="small text-muted mb-1">Current Pricing</div>
-                            <div class="mb-1">
-                                Below quota: <strong>{{ config.summer_price_low }} Ft/kWh</strong>
-                            </div>
-                            <div>
-                                Above quota: <strong>{{ config.summer_price_high }} Ft/kWh</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Recent Readings -->
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="bi bi-clock-history me-2"></i>
-                    Recent Meter Readings
-                </h5>
-            </div>
-            <div class="card-body">
-                {% if recent_readings %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Summer Value</th>
-                                    <th>Winter Value</th>
-                                    <th>Summer Usage</th>
-                                    <th>Winter Usage</th>
-                                    <th>Cost</th>
-                                    <th>Quota</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for reading in recent_readings %}
-                                    <tr class="reading-row">
-                                        <td>{{ reading.reading_date }}</td>
-                                        <td>{{ reading.summer_value|floatformat:0 }} kWh</td>
-                                        <td>{{ reading.winter_value|floatformat:0 }} kWh</td>
-                                        <td>
-                                            {% if reading.summer_usage > 0 %}
-                                                <span class="badge bg-primary">{{ reading.summer_usage|floatformat:0 }}</span>
-                                            {% else %}
-                                                <span class="text-muted">—</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if reading.winter_usage > 0 %}
-                                                <span class="badge bg-info">{{ reading.winter_usage|floatformat:0 }}</span>
-                                            {% else %}
-                                                <span class="text-muted">—</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-success badge-cost">{{ reading.total_cost|floatformat:0 }} Ft</span>
-                                        </td>
-                                        <td>
-                                            {% with quota_pct=reading.get_quota_usage_percentage %}
-                                                {% if quota_pct < 70 %}
-                                                    <span class="badge bg-success">{{ quota_pct|floatformat:0 }}%</span>
-                                                {% elif quota_pct < 90 %}
-                                                    <span class="badge bg-warning">{{ quota_pct|floatformat:0 }}%</span>
-                                                {% else %}
-                                                    <span class="badge bg-danger">{{ quota_pct|floatformat:0 }}%</span>
-                                                {% endif %}
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'energy_tracker:reading_detail' reading.pk %}" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    {% if is_paginated %}
-                    <nav class="mt-3">
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">«</a>
-                                </li>
-                            {% endif %}
-                            <li class="page-item disabled">
-                                <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-                            </li>
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">»</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
-                    </div>
-                {% else %}
-                    <div class="text-center py-4">
-                        <i class="bi bi-graph-up text-muted" style="font-size: 3rem;"></i>
-                        <h5 class="mt-3 text-muted">No meter readings yet</h5>
-                        <p class="text-muted">Start by adding your first meter reading to track your energy usage.</p>
-                        <a href="{% url 'energy_tracker:add_reading' %}" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-1"></i> Add First Reading
-                        </a>
-                    </div>
+            {% if is_paginated %}
+            <nav class="pager">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}">&laquo;</a>
                 {% endif %}
+                <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+                {% endif %}
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3.5 2" />
+                </svg>
+                <h3>No meter readings yet</h3>
+                <p>Add your first reading to start tracking usage and cost.</p>
+                <a href="{% url 'energy_tracker:add_reading' %}" class="btn">Add first reading</a>
             </div>
-        </div>
+        {% endif %}
     </div>
 </div>
+
 {% endblock %}
